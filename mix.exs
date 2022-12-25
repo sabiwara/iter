@@ -63,6 +63,7 @@ defmodule Iter.MixProject do
 
   defp docs do
     [
+      main: "Iter",
       source_ref: "v#{@version}",
       source_url: @github_url,
       homepage_url: @github_url,
