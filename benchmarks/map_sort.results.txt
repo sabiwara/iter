@@ -1,0 +1,38 @@
+Operating System: macOS
+CPU Information: Apple M1
+Number of Available Cores: 8
+Available memory: 16 GB
+Elixir 1.14.2
+Erlang 25.0
+
+Benchmark suite executing with the following configuration:
+warmup: 2 s
+time: 2 s
+memory time: 500 ms
+reduction time: 0 ns
+parallel: 1
+inputs: none specified
+Estimated total run time: 13.50 s
+
+Benchmarking Enum ...
+Benchmarking Iter ...
+Benchmarking Stream ...
+
+Name             ips        average  deviation         median         99th %
+Iter        601.41 K        1.66 μs   ±564.30%        1.46 μs        3.75 μs
+Enum        443.86 K        2.25 μs   ±213.77%        2.04 μs        5.17 μs
+Stream      127.99 K        7.81 μs    ±31.39%        7.67 μs        9.71 μs
+
+Comparison: 
+Iter        601.41 K
+Enum        443.86 K - 1.35x slower +0.59 μs
+Stream      127.99 K - 4.70x slower +6.15 μs
+
+Memory usage statistics:
+
+Name      Memory usage
+Iter           9.49 KB
+Enum           8.48 KB - 0.89x memory usage -1.01563 KB
+Stream        24.15 KB - 2.54x memory usage +14.66 KB
+
+**All measurements for memory usage were the same**

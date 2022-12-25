@@ -1,0 +1,796 @@
+# The Ultimate `Enum` Cheatsheet
+
+The `Enum` module provides functions that are incredibly useful, flexible and
+expressive. It is fair to claim that it is more than making up for the lack of
+loops in Elixir. However, the number of functions might feel overwhelming at
+first.
+
+This cheatsheet is meant as an attempt to categorize functions in order to learn
+or find them more easily. It doesn't mean to be exhaustive, and it also contains
+a few non-`Enum` yet useful recipes for working with enumerables.
+
+_Disclaimer: this cheatsheet is not directly related to `Iter`, but since
+`Iter` API is based on `Enum` it can also help its usage_.
+
+## Return a list of the same size
+
+{: .col-2}
+
+
+### Transform each element
+
+#### `Enum.map/2`
+
+```elixir
+iex> Enum.map(1..3, & &1 ** 2)
+[1, 4, 9]
+```
+
+#### Using the index: `Enum.with_index/2`
+
+```elixir
+iex> Enum.with_index(["a", "b", "c"])
+[{"a", 0}, {"b", 1}, {"c", 2}]
+iex> Enum.with_index(["a", "b", "c"], &String.duplicate(&1, &2))
+["", "b", "cc"]
+```
+
+#### Using another list/enumerable: `Enum.zip/2` or `Enum.zip_with/3`
+
+```elixir
+iex> Enum.zip(["i", "x", "c"], [1, 10, 100])
+[{"i", 1}, {"x", 10}, {"c", 100}]
+iex> Enum.zip_with(["i", "x", "c"], [1, 10, 100], &"#{&1}: #{&2}")
+["i: 1", "x: 10", "c: 100"]
+```
+
+#### See also: `Enum.zip/1`, `Enum.zip_with/2`, `Enum.unzip/1`
+
+#### Using an accumulator: `Enum.map_reduce/3`
+
+```elixir
+# 1/1, 2/3, 3/6, 4/10
+iex> Enum.map_reduce(1..4, 0, fn x, acc ->
+...>   new_acc = x + acc
+...>   {x / new_acc, new_acc}
+...> end)
+{[1.0, 0.6666666666666666, 0.5, 0.4], 10}
+```
+
+### Just cast as a list
+
+#### `Enum.to_list/1`
+
+```elixir
+iex> Enum.to_list(1..3)
+[1, 4, 9]
+iex> Enum.to_list(%{"foo" => 1, "bar" => 2})
+[{"bar", 2}, {"foo", 1}]
+```
+
+### Reordering
+
+#### Reverse order: `Enum.reverse/2`
+
+```elixir
+iex> Enum.reverse([:a, :b, :c])
+[:c, :b, :a]
+```
+
+#### `Enum.sort/1` / `Enum.sort/2`
+
+```elixir
+iex> Enum.sort([:b, :d, :a, :c])
+[:a, :b, :c, :d]
+iex> Enum.sort([:b, :d, :a, :c], :desc)
+[:d, :c, :b, :a]
+```
+
+#### `Enum.sort_by/2` / `Enum.sort_by/3`
+
+```elixir
+iex> Enum.sort_by(["abc", "d", "ef"], &String.length/1)
+["d", "ef", "abc"]
+iex> Enum.sort_by(["abc", "d", "ef"], &String.length/1, :desc)
+["abc", "ef", "d"]
+```
+
+#### ⚠️ WARNING - Pitfall when comparing structs, see [doc](https://hexdocs.pm/elixir/Enum.html#sort/2-sorting-structs)
+
+```elixir
+iex> dates = [~D[2019-01-01], ~D[2020-03-02], ~D[2019-06-06]]
+iex> Enum.sort(dates)
+[~D[2019-01-01], ~D[2020-03-02], ~D[2019-06-06]]
+iex> Enum.sort(dates, Date)
+[~D[2019-01-01], ~D[2019-06-06], ~D[2020-03-02]]
+```
+
+#### Random order: `Enum.shuffle/1`
+
+```elixir
+iex> Enum.shuffle([:a, :b, :c, :d])
+[:c, :a, :d, :b]
+```
+
+
+## Return a shorter list
+
+{: .col-2}
+
+### Filtering on a condition
+
+#### `Enum.filter/2` / `Enum.reject/2`
+
+```elixir
+iex> Enum.filter(["ant", "bat", "cat"], & &1 =~ "at")
+["bat", "cat"]
+iex> Enum.reject(["ant", "bat", "cat"], & &1 =~ "at")
+["ant"]
+```
+
+#### Both at once: `Enum.split_with/2`:
+
+```elixir
+iex> Enum.split_with(["ant", "bat", "cat"], & &1 =~ "at")
+{["bat", "cat"], ["ant"]}
+```
+
+#### Filtering + transforming in one pass: `for/1` comprehension
+
+```elixir
+iex> for s <- ["ant", "bat", "cat"], s =~ "at" do
+...>   String.capitalize(s)
+...> end
+["Bat", "Cat"]
+```
+
+### Slicing
+
+#### From a range: `Enum.slice/2`
+
+```elixir
+iex> Enum.slice([1, 2, 3, 4, 5], 1..3)
+[2, 3, 4]
+```
+
+#### From an index and amount: `Enum.slice/3`
+
+```elixir
+iex> Enum.slice(1..100, 5, 10)
+[6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+```
+
+### Amount-based
+
+#### Keep an amount: `Enum.take/2`
+
+```elixir
+iex> Enum.take(["ant", "bat", "cat", "dog"], 2)
+["ant", "bat"]
+# negative index: take from the end
+iex> Enum.take(["ant", "bat", "cat", "dog"], -2)
+["cat", "dog"]
+```
+
+#### Remove an amount: `Enum.drop/2`
+
+```elixir
+iex> Enum.drop(["ant", "bat", "cat", "dog"], 2)
+["cat", "dog"]
+# negative index: drop from the end
+iex> Enum.drop(["ant", "bat", "cat", "dog"], -2)
+["ant", "bat"]
+```
+
+#### Both at once: `Enum.split/2`
+
+```elixir
+iex> Enum.split(["ant", "bat", "cat", "dog"], 2)
+{["ant", "bat"], ["cat", "dog"]}
+```
+
+### Until a condition is met
+
+#### `Enum.take_while/2` / `Enum.drop_while/2`
+
+```elixir
+iex> Enum.take_while(["bat", "cat", "dog"], & &1 =~ "at")
+["bat", "cat"]
+iex> Enum.drop_while(["bat", "cat", "dog"], & &1 =~ "at")
+["dog"]
+```
+
+#### Both at once: `Enum.split_while/2`:
+
+```elixir
+iex> Enum.split_while(["bat", "cat", "dog"], & &1 =~ "at")
+{["bat", "cat"], ["dog"]}
+```
+
+### Removing duplicates
+
+#### All duplicates: `Enum.uniq/1` / `Enum.uniq_by/2`
+
+```elixir
+iex> Enum.uniq([3, 2, 1, 1, 2, 3])
+[3, 2, 1]
+iex> Enum.uniq_by(["foo", "bar", "baz", "foo"], &String.first/1)
+["foo", "bar"]
+```
+
+#### Successive duplicates only: `Enum.dedup/1` / `Enum.dedup_by/2`
+
+```elixir
+iex> Enum.dedup([3, 2, 1, 1, 2, 3])
+[3, 2, 1, 2, 3]
+iex> Enum.dedup_by(["foo", "bar", "baz", "foo"], &String.first/1)
+["foo", "bar", "foo"]
+```
+
+#### Side note - Use a set: `MapSet.new/1` / `MapSet.new/2`
+
+When working with unique elements, maybe a list isn't the best data structure.
+If you don't care about the ordering but want to efficiently test for
+membership, you most likely want a `MapSet`.
+
+```elixir
+iex> MapSet.new([3, 2, 1, 1, 2, 3])
+MapSet.new([1, 2, 3])
+iex> MapSet.new(["foo", "bar", "baz", "foo"], &String.first/1)
+MapSet.new(["b", "f"])
+```
+
+### Random sample
+
+#### `Enum.take_random/2`
+
+```elixir
+iex> Enum.take_random([:a, :b, :c, :d], 2)
+[:c, :a]
+```
+
+## Return/search a single element
+
+{: .col-2}
+
+### Element matching a condition
+
+These will return early at the first match.
+
+#### `Enum.find/2`
+
+```elixir
+iex> Enum.find(["ant", "bat", "cat"], & &1 =~ "at")
+"bat"
+```
+
+#### With transformation: `Enum.find_value/2`
+
+```elixir
+iex> Enum.find_value(["ant", "bat", "cat"], & &1 =~ "at" && String.upcase(&1))
+"BAT"
+```
+
+#### Its index: `Enum.find_index/2`
+
+```elixir
+iex> Enum.find_index(["ant", "bat", "cat"], & &1 =~ "at")
+1
+```
+
+### An extreme value
+
+#### `Enum.max/1` / `Enum.max_by/2`
+
+```elixir
+iex> Enum.max([2, 5, 3, 1, 4])
+5
+iex> Enum.max_by(["a", "bcd", "ef"], &String.length/1)
+"bcd"
+```
+
+#### `Enum.min/1` / `Enum.min_by/2`
+
+```elixir
+iex> Enum.min([2, 5, 3, 1, 4])
+1
+iex> Enum.min_by(["a", "bcd", "ef"], &String.length/1)
+"a"
+```
+
+#### ⚠️ WARNING - Pitfall when comparing structs, see [doc](`Enum.max/1`)
+
+```elixir
+iex> Enum.max([~D[2017-03-31], ~D[2017-04-01]])
+~D[2017-03-31]
+iex> Enum.max([~D[2017-03-31], ~D[2017-04-01]], Date)
+~D[2017-04-01]
+```
+
+#### Both at once: `Enum.min_max/1` / `Enum.min_max_by/2`
+
+```elixir
+iex> Enum.min_max([2, 5, 3, 1, 4])
+{1, 5}
+iex> Enum.min_max_by(["a", "bcd", "ef"], &String.length/1)
+{"a", "bcd"}
+```
+
+### At a known index
+
+#### ⚠️ WARNING
+
+Accessing linked lists by index is **linear**. If you are using the following in
+a nested call, you are probably doing something wrong.
+
+#### Raising on failure: `Enum.fetch!/2`
+
+```elixir
+iex> Enum.fetch!(["ant", "bat", "cat"], 0)
+"ant"
+iex> Enum.fetch!(["ant", "bat", "cat"], -1)
+"cat"
+iex> Enum.fetch!(["ant", "bat", "cat"], 3)
+** (Enum.OutOfBoundsError) out of bounds error
+```
+
+#### `:ok`/`:error` result: `Enum.fetch/2`
+
+```elixir
+iex> Enum.fetch(["ant", "bat", "cat"], 2)
+{:ok, "cat"}
+iex> Enum.fetch(["ant", "bat", "cat"], 3)
+:error
+```
+
+#### With default value: `Enum.at/2`
+
+```elixir
+iex> Enum.at(["ant", "bat", "cat"], 3)
+nil
+iex> Enum.at(["ant", "bat", "cat"], 3, "none")
+"none"
+```
+
+### Random sample
+
+#### `Enum.random/1`
+
+```elixir
+iex> Enum.random([:a, :b, :c, :d])
+:c
+```
+
+## Return a number
+
+{: .col-2}
+
+### Count without stopping
+
+#### All elements: `Enum.count/1`
+
+```elixir
+iex> Enum.count(["ant", "bat", "cat"])
+3
+```
+
+#### Matching elements: `Enum.count/2`
+
+```elixir
+iex> Enum.count(["ant", "bat", "cat"], & &1 =~ "at")
+2
+```
+
+### Count up to a limit
+
+#### `Enum.count_until/2`
+
+```elixir
+iex> Enum.count_until(1..20, 5)
+5
+iex> Enum.count_until(1..20, 50)
+20
+```
+
+#### Matching elements: `Enum.count_until/3`
+
+```elixir
+iex> Enum.count_until(1..20, &rem(&1, 2) == 0, 5)
+5
+iex> Enum.count_until(1..20, &rem(&1, 2) == 0, 50)
+10
+```
+
+### Other aggregations
+
+#### `Enum.sum/1`
+
+```elixir
+iex> Enum.sum([1, 20, 300])
+321
+```
+
+#### `Enum.product/1`
+
+```elixir
+iex> Enum.product([1, 20, 300])
+6000
+```
+
+### Find an index
+
+#### `Enum.find_index/2`
+
+```elixir
+iex> Enum.find_index(["ant", "bat", "cat"], & &1 =~ "at")
+1
+```
+
+## Return a map
+
+{: .col-2}
+
+### Sample data
+
+```elixir
+iex> users = [%{id: 10, name: "Joe"}, %{id: 20, name: "Robert"}, %{id: 30, name: "Jose"}]
+```
+
+{: .wrap}
+
+### From key/value pairs
+
+#### `Map.new/2` / `Map.new/1`
+
+```elixir
+iex> Map.new(users, &{&1.id, &1.name})
+%{10 => "Joe", 20 => "Robert", 30 => "Jose"}
+iex> Map.new([{:foo, 12}, {:bar, 5}])
+%{bar: 5, foo: 12}
+```
+
+#### `Enum.into/3` / `Enum.into/2`
+
+```elixir
+iex> Enum.into(users, %{}, &{&1.id, &1.name})
+%{10 => "Joe", 20 => "Robert", 30 => "Jose"}
+iex> Enum.into([{:foo, 12}, {:bar, 5}], %{})
+%{bar: 5, foo: 12}
+```
+
+### Aggregations
+
+#### Counting: `Enum.frequencies/1` / `Enum.frequencies_by/2`
+
+```elixir
+iex> Enum.frequencies(["a", "b", "a", "c"])
+%{"a" => 2, "b" => 1, "c" => 1}
+iex> Enum.frequencies_by(users, &String.first(&1.name))
+%{"J" => 2, "R" => 1}
+```
+
+#### Grouping: `Enum.group_by/2` / `Enum.group_by/3`
+
+```elixir
+iex> Enum.group_by(users, &String.first(&1.name))
+%{
+  "J" => [%{id: 10, name: "Joe"}, %{id: 30, name: "Jose"}],
+  "R" => [%{id: 20, name: "Robert"}]
+}
+iex> Enum.group_by(users, &String.first(&1.name), & &1.id)
+%{"J" => [10, 30], "R" => [20]}
+```
+
+## Return/build a string
+
+{: .col-2}
+
+### Sample data
+
+```elixir
+words = ["hello", "world"]
+```
+
+{: .wrap}
+
+### Actually return a string
+
+#### `Enum.map_join/3`
+
+```elixir
+iex> Enum.map_join(words, ", ", &String.capitalize/1)
+"Hello, World"
+```
+
+#### When no need to transform: `Enum.join/2`
+
+```elixir
+iex> Enum.join(1..5, "-")
+"1-2-3-4-5"
+```
+
+#### ⚠️ WARNING - Efficient string building
+
+Building your string manually using [concatenation](`<>/2`) might lead to
+degraded performance, make sure to always rely on `Enum.map_join/3` /
+`Enum.join/2` or use [IO data](https://hexdocs.pm/elixir/IO.html#module-io-data)
+to build large strings dynamically.
+
+### Building and using IO data
+
+#### Joining as IO data: `Enum.map_intersperse/3`
+
+```elixir
+iex> Enum.map_intersperse(words, ", ", &String.capitalize/1)
+["Hello", ", ", "World"]
+```
+
+#### When no need to transform: `Enum.intersperse/2`
+
+```elixir
+# only when already list/enumerable of strings
+iex> Enum.intersperse(words, ", ")
+["hello", ", ", "world"]
+# else need to map_intersperse + to_string
+iex> Enum.map_intersperse(1..5, ", ", &to_string/1)
+["1", ", ", "2", ", ", "3", ", ", "4", ", ", "5"]
+```
+
+#### IO data to string: `IO.iodata_to_binary/1`
+
+```elixir
+iex> IO.iodata_to_binary(["Hello", ", " | ["World", ?!]])
+"Hello, World!"
+```
+
+#### NOTE - Building a string might be un-necessary
+
+```elixir
+# IO data can be used directly for IO
+iex> IO.puts(["Hello", ", " | ["World", ?!]])
+Hello, World!
+:ok
+iex> File.write!("hello.txt", ["Hello", ", " | ["World", ?!]])
+:ok
+```
+
+## Return a boolean
+
+{: .col-2}
+
+### Matching a condition
+
+These will return early at the first match.
+
+#### `Enum.any?/2`
+
+```elixir
+iex> Enum.any?(["ant", "bat", "cat"], & &1 =~ "at")
+true
+iex> Enum.any?(["ant", "bat", "cat"], & &1 =~ "z")
+false
+```
+
+#### `Enum.all?/2`
+
+```elixir
+iex> Enum.all?(["ant", "bat", "cat"], & &1 =~ "t")
+true
+iex> Enum.all?(["ant", "bat", "cat"], & &1 =~ "at")
+false
+```
+
+### Emptiness
+
+#### `Enum.empty?/1`
+
+```elixir
+iex> Enum.empty?([])
+true
+iex> Enum.empty?([:exists])
+true
+```
+
+### Membership
+
+#### `Enum.member?/2`
+
+```elixir
+iex> Enum.member?(["ant", "bat", "cat"], "bat")
+true
+iex> Enum.member?(["ant", "bat", "cat"], "dog")
+false
+```
+
+#### Same but shorter: `in/2`
+
+```elixir
+iex> "bat" in ["ant", "bat", "cat"]
+true
+```
+
+#### Side note - Use a set: `MapSet.new/1` / `MapSet.new/2`
+
+Checking membership within a list has a linear cost - potentially
+quadratic within a loop. You might want to convert a list to a
+`MapSet` for efficient lookups.
+
+```elixir
+# DON'T
+Enum.find(fn x -> x.id in list end)
+# DO
+set = MapSet.new(list)
+Enum.find(fn x -> x.id in set end)
+```
+
+## Return a flattened list
+
+{: .col-2}
+
+#### Without transformation: `Enum.concat/1`
+
+```elixir
+iex> Enum.concat([["ant", "bat"], ["cat", "dog"]])
+["ant", "bat", "cat", "dog"]
+```
+
+#### With transformation: `Enum.flat_map/2`
+
+```elixir
+iex> list = [%{data: [1, 2]}, %{data: [3, 4]}]
+iex> Enum.flat_map(list, & &1.data)
+[1, 2, 3, 4]
+```
+
+## Return several smaller lists
+
+{: .col-2}
+
+#### By size: `Enum.chunk_every/2` / `Enum.chunk_every/4`
+
+```elixir
+iex> Enum.chunk_every([1, 2, 3, 4, 5, 6], 2)
+[[1, 2], [3, 4], [5, 6]]
+Enum.chunk_every([1, 2, 3, 4, 5, 6], 3, 2, :discard)
+[[1, 2, 3], [3, 4, 5]]
+```
+
+#### Grouped by condition: `Enum.chunk_by/2`
+
+```elixir
+iex> animals = ["cat", "bat", "beaver", "camel"]
+iex> Enum.chunk_by(animals, &String.first/1)
+[["cat"], ["bat", "beaver"], ["camel"]]
+```
+
+#### See also: `Enum.chunk_while/4`
+
+## When nothing else works
+
+{: .col-2}
+
+### The closest thing to a `for` loop
+
+#### The most important one: `Enum.reduce/3`
+
+```elixir
+iex> Enum.reduce([2, 4, 8], 0, fn x, acc ->
+...>   acc + 1 / x
+...> end)
+0.875 # 1 / 2 + 1 / 4 + 1 / 8
+```
+
+#### ⚠️ WARNING - Building a list
+
+Lists should **never** be built by appending, always by prepending. Quoting the
+[Erlang efficiency guide](https://www.erlang.org/doc/efficiency_guide/listhandling#creating-a-list),
+_"To avoid copying the result in each iteration, build the list in reverse order
+and reverse the list when you are done"_:
+
+```elixir
+iex> Enum.reduce(1..5, [], fn x, acc -> [x ** 2 | acc] end)
+[25, 16, 9, 4, 1]
+iex> |> Enum.reverse()
+[1, 4, 9, 16, 25]
+```
+
+#### ⚠️ WARNING - Reinventing the wheel
+
+`Enum.reduce/3` and its variants are very powerful and can be seen as the swiss
+army knife of the `Enum` module. But if there is a specialized function that
+does what you need, rolling your own manual implementation might be more verbose
+and less efficient (see the [build a string](#return-build-a-string) section for
+example).
+
+### Skipping the initial accumulator
+
+#### `Enum.reduce/2`
+
+```elixir
+# first element will be used as accumulator instead
+iex> Enum.reduce([2, 4, 8], fn x, acc ->
+...>   acc + 1 / x
+...> end)
+2.375 # 2 + 1 / 4 + 1 / 8
+```
+
+#### ⚠️ WARNING - Edge cases
+
+```elixir
+# It might seem that 0 is optional here...
+iex> Enum.reduce([10, 20, 30], &+/2)
+60
+# ... but will actually raise if empty
+iex> Enum.reduce([], &+/2)
+** (Enum.EmptyError) empty error
+```
+
+### Early returns (like `break`)
+
+#### `Enum.reduce_while/3`
+
+```elixir
+iex> Enum.reduce_while([2, 4, 0, 1], 0, fn x, acc ->
+...>   if x == 0 do
+...>     {:halt, acc}
+...>   else
+...>     {:cont, acc + 1 / x}
+...>   end
+...> end)
+0.75 # 1 / 2 + 1 / 4
+```
+
+#### NOTE - Recursion
+
+The benefit of `Enum.reduce_while/3` is that it works with any enumerable.
+However, a recursion-based implementation might be more readable, maintainable
+and performant if you only need to support lists. The previous example could be
+re-implemented as:
+
+```elixir
+  def sum_inverses([x | xs], acc) when x != 0 do
+    sum_inverses(xs, acc + 1 / x)
+  end
+
+  def sum_inverses(_, acc), do: acc
+```
+
+### Working with several lists / enumerables
+
+#### Two inputs: `Enum.zip_reduce/4`
+
+```elixir
+iex> Enum.zip_reduce([3, 4, 2], [100, 10, 1], 0, fn x, y, acc ->
+...>   x * y + acc
+...> end)
+342 # 3 * 100 + 4 * 10 + 2 * 1
+```
+
+#### More inputs: `Enum.zip_reduce/3`
+
+```elixir
+iex> Enum.zip_reduce([[4, 2], [10, 1], [1, -1]], 0, fn xs, acc ->
+...>   Enum.product(xs) + acc
+...> end)
+38 # 4 * 10 * 1 + 2 * 1 * -1
+```
+
+### Keeping all the steps
+
+#### With initial accumulator: `Enum.scan/3`
+
+```elixir
+iex> Enum.scan([2, 4, 8], 0, fn x, acc ->
+...>   acc + 1 / x
+...> end)
+[0.5, 0.75, 0.875]
+```
+
+#### Without initial accumulator: `Enum.scan/2`
+
+```elixir
+iex> Enum.scan([2, 4, 8], fn x, acc ->
+...>   acc + 1 / x
+...> end)
+[2, 2.25, 2.375]
+```

@@ -1,0 +1,19 @@
+list = Enum.to_list(1..100) |> Enum.shuffle()
+
+defmodule Bench do
+  require Iter
+
+  def enum(list), do: list |> Enum.map(&(&1 + 1)) |> Enum.random()
+  def stream(list), do: list |> Stream.map(&(&1 + 1)) |> Enum.random()
+  def iter(list), do: list |> Iter.map(&(&1 + 1)) |> Iter.random()
+end
+
+Benchee.run(
+  %{
+    "Enum" => fn -> Bench.enum(list) end,
+    "Stream" => fn -> Bench.stream(list) end,
+    "Iter" => fn -> Bench.iter(list) end
+  },
+  time: 2,
+  memory_time: 0.5
+)
