@@ -63,7 +63,7 @@ When there is no possibility of merging steps, `Iter` is simply delegating to
 ```elixir
 def deps do
   [
-    {:iter, "~> 0.1.0"}
+    {:iter, "~> 0.1.1"}
   ]
 end
 ```
