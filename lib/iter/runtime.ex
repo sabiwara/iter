@@ -155,4 +155,15 @@ defmodule Iter.Runtime do
   defp do_wrap_intersperse([head | tail], separator, acc) do
     do_wrap_intersperse(tail, separator, [separator, head | acc])
   end
+
+  @spec preprocess_slice_range(Range.t()) :: {integer(), integer(), integer()}
+  def preprocess_slice_range(start..stop//step)
+      when is_integer(start) and start >= 0 and is_integer(stop) and stop >= 0 and
+             is_integer(step) and step > 0 do
+    case stop - start do
+      negative when negative < 0 -> {0, -1, 1}
+      amount when step == 1 -> {-start, amount, step}
+      amount -> {-start, amount - rem(amount, step), step}
+    end
+  end
 end

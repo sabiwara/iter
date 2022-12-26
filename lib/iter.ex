@@ -195,6 +195,38 @@ defmodule Iter do
   def_iter split(enumerable, amount)
 
   @doc """
+  Returns a subset list of the given `enumerable` by `index_range`.
+  Equivalent to `Enum.slice/2`.
+
+  #{@negative_indexes_disclaimer}
+
+  ## Examples
+
+      iex> Iter.slice(1..100, 5..15)
+      [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+      iex> Iter.slice(1..100, 5..15//5)
+      [6, 11, 16]
+
+  """
+  def_iter slice(enumerable, index_range)
+
+  @doc """
+  Returns a subset list of the given enumerable, from `start_index` with `amount`
+  number of elements if available.
+  Equivalent to `Enum.slice/3`.
+
+  #{@negative_indexes_disclaimer}
+
+  ## Examples
+
+      iex> Iter.slice(1..100, 5, 10)
+      [6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+  """
+  def_iter slice(enumerable, start_index, amount)
+
+  @doc """
   Takes the elements from the beginning of the `enumerable`, while `fun` returns
   a truthy value. Equivalent to `Enum.take_while/2`.
 

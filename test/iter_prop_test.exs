@@ -84,6 +84,8 @@ defmodule Iter.PropTest do
       {:drop, integer(0..10)},
       {:take_while, filter()},
       {:drop_while, filter()},
+      {:slice_2, integer(0..100), integer(0..100), integer(1..10)},
+      {:slice_3, integer(0..100), integer(0..100)},
       :flat_map,
       :to_list,
       :reverse,
@@ -211,6 +213,20 @@ defmodule Iter.PropTest do
               ] do
       quote do
         unquote(ast) |> unquote(module).unquote(fun)()
+      end
+    end
+
+    defp do_build_pipeline(ast, {:slice_2, start, stop, step}, module)
+         when is_integer(start) and is_integer(stop) and is_integer(step) do
+      quote do
+        unquote(ast) |> unquote(module).slice(unquote(start)..unquote(stop)//unquote(step))
+      end
+    end
+
+    defp do_build_pipeline(ast, {:slice_3, start, amount}, module)
+         when is_integer(start) and is_integer(amount) do
+      quote do
+        unquote(ast) |> unquote(module).slice(unquote(start), unquote(amount))
       end
     end
 

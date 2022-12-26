@@ -228,6 +228,36 @@ defmodule IterTest do
     end
   end
 
+  describe "slice/2" do
+    test "simple call" do
+      assert [1, 2, 3, 4] |> Iter.slice(1..2) == [2, 3]
+      assert 1..4 |> Iter.slice(1..2) == [2, 3]
+
+      assert 0..99 |> Iter.slice(5..15//5) == [5, 10, 15]
+      assert 0..99 |> Iter.slice(25..15//5) == []
+    end
+
+    test "pipeline" do
+      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.slice(1..2) == [4, 6]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.slice(1..2) == [4, 6]
+
+      assert 0..99 |> Iter.map(&(&1 * 2)) |> Iter.slice(5..15//5) == [10, 20, 30]
+      assert 0..99 |> Iter.map(&(&1 * 2)) |> Iter.slice(25..15//5) == []
+    end
+  end
+
+  describe "slice/3" do
+    test "simple call" do
+      assert [1, 2, 3, 4] |> Iter.slice(1, 2) == [2, 3]
+      assert 1..4 |> Iter.slice(1, 2) == [2, 3]
+    end
+
+    test "pipeline" do
+      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.slice(1, 2) == [4, 6]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.slice(1, 2) == [4, 6]
+    end
+  end
+
   describe "take_while/2" do
     test "simple call" do
       assert [1, 2, 3, 4, 0] |> Iter.take_while(&(&1 < 3)) == [1, 2]

@@ -313,6 +313,83 @@ defmodule Iter.Step do
     }
   end
 
+  @spec slice(ast) :: t
+  def slice(range) do
+    stop_index = Macro.unique_var(:stop_index, __MODULE__)
+    step = Macro.unique_var(:step, __MODULE__)
+    index = Macro.unique_var(:index, __MODULE__)
+
+    %{
+      halt: true,
+      extra_args: [index],
+      init: fn ->
+        quote do
+          {unquote(index), unquote(stop_index), unquote(step)} =
+            Runtime.preprocess_slice_range(unquote(range))
+        end
+      end,
+      next_acc: fn vars, continue ->
+        quote do
+          case unquote(index) do
+            index when index > unquote(stop_index) ->
+              {:__ITER_HALT__, unquote(vars.composite_acc)}
+
+            index when index < 0 or rem(index, unquote(step)) != 0 ->
+              unquote(index) = index + 1
+              unquote(vars.composite_acc)
+
+            index ->
+              unquote(index) = index + 1
+              unquote_splicing(to_exprs(continue))
+          end
+        end
+      end
+    }
+  end
+
+  @spec slice(ast, ast) :: t
+  def slice(index_value, amount_value) do
+    start_index = Macro.unique_var(:start_index, __MODULE__)
+    stop_index = Macro.unique_var(:stop_index, __MODULE__)
+    index = Macro.unique_var(:index, __MODULE__)
+
+    %{
+      halt: true,
+      extra_args: [index],
+      init: fn ->
+        quote do
+          amount = Runtime.validate_positive_integer(unquote(amount_value))
+
+          unquote(start_index) =
+            case amount do
+              0 -> 0
+              _ -> Runtime.validate_positive_integer(unquote(index_value))
+            end
+
+          unquote(stop_index) = amount + unquote(start_index)
+
+          unquote(index) = 0
+        end
+      end,
+      next_acc: fn vars, continue ->
+        quote do
+          case unquote(index) do
+            index when index < unquote(start_index) ->
+              unquote(index) = index + 1
+              unquote(vars.composite_acc)
+
+            index when index < unquote(stop_index) ->
+              unquote(index) = index + 1
+              unquote_splicing(to_exprs(continue))
+
+            _ ->
+              {:__ITER_HALT__, unquote(vars.composite_acc)}
+          end
+        end
+      end
+    }
+  end
+
   @spec take_while(ast) :: t
   def take_while(fun) do
     %{
@@ -1311,6 +1388,8 @@ defmodule Iter.Step do
   defp do_from_ast({:take, _, [amount]}), do: take(amount)
   defp do_from_ast({:drop, _, [amount]}), do: drop(amount)
   defp do_from_ast({:split, _, [amount]}), do: split(amount)
+  defp do_from_ast({:slice, _, [range]}), do: slice(range)
+  defp do_from_ast({:slice, _, [start, amount]}), do: slice(start, amount)
   defp do_from_ast({:take_while, _, [fun]}), do: take_while(fun)
   defp do_from_ast({:drop_while, _, [fun]}), do: drop_while(fun)
   defp do_from_ast({:split_while, _, [fun]}), do: split_while(fun)
