@@ -2,6 +2,8 @@
 
 ## Dev
 
+## v0.1.2 (2022-12-28)
+
 ### Enhancements
 
 - Add `Iter.take_every/2` and `Iter.drop_every/2`
