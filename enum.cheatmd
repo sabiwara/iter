@@ -606,7 +606,7 @@ false
 iex> Enum.empty?([])
 true
 iex> Enum.empty?([:exists])
-true
+false
 ```
 
 ### Membership
