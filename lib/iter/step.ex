@@ -390,6 +390,68 @@ defmodule Iter.Step do
     }
   end
 
+  @spec take_every(ast) :: t
+  def take_every(_nth = value) do
+    nth = Macro.unique_var(:nth, __MODULE__)
+    counter = Macro.unique_var(:counter, __MODULE__)
+
+    %{
+      extra_args: [counter],
+      init: fn ->
+        quote do
+          unquote(counter) = unquote(nth) = Runtime.validate_positive_integer(unquote(value))
+        end
+      end,
+      next_acc: fn vars, continue ->
+        quote do
+          case unquote(counter) do
+            0 ->
+              unquote(vars.composite_acc)
+
+            ^unquote(nth) ->
+              unquote(counter) = 1
+              (unquote_splicing(to_exprs(continue)))
+
+            _ ->
+              unquote(counter) = unquote(counter) + 1
+              unquote(vars.composite_acc)
+          end
+        end
+      end
+    }
+  end
+
+  @spec drop_every(ast) :: t
+  def drop_every(_nth = value) do
+    nth = Macro.unique_var(:nth, __MODULE__)
+    counter = Macro.unique_var(:counter, __MODULE__)
+
+    %{
+      extra_args: [counter],
+      init: fn ->
+        quote do
+          unquote(counter) = unquote(nth) = Runtime.validate_positive_integer(unquote(value))
+        end
+      end,
+      next_acc: fn vars, continue ->
+        quote do
+          case unquote(counter) do
+            0 ->
+              (unquote_splicing(to_exprs(continue)))
+
+            ^unquote(nth) ->
+              unquote(counter) = 1
+              unquote(vars.composite_acc)
+
+            _ ->
+              unquote(counter) = unquote(counter) + 1
+              (unquote_splicing(to_exprs(continue)))
+          end
+        end
+      end
+    }
+  end
+
   @spec take_while(ast) :: t
   def take_while(fun) do
     %{
@@ -1390,6 +1452,8 @@ defmodule Iter.Step do
   defp do_from_ast({:split, _, [amount]}), do: split(amount)
   defp do_from_ast({:slice, _, [range]}), do: slice(range)
   defp do_from_ast({:slice, _, [start, amount]}), do: slice(start, amount)
+  defp do_from_ast({:take_every, _, [nth]}), do: take_every(nth)
+  defp do_from_ast({:drop_every, _, [nth]}), do: drop_every(nth)
   defp do_from_ast({:take_while, _, [fun]}), do: take_while(fun)
   defp do_from_ast({:drop_while, _, [fun]}), do: drop_while(fun)
   defp do_from_ast({:split_while, _, [fun]}), do: split_while(fun)

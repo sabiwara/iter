@@ -258,6 +258,30 @@ defmodule IterTest do
     end
   end
 
+  describe "take_every/2" do
+    test "simple call" do
+      assert [1, 2, 3, 4] |> Iter.take_every(2) == [1, 3]
+      assert 1..4 |> Iter.take_every(2) == [1, 3]
+    end
+
+    test "pipeline" do
+      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.take_every(2) == [2, 6]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.take_every(2) == [2, 6]
+    end
+  end
+
+  describe "drop_every/2" do
+    test "simple call" do
+      assert [1, 2, 3, 4] |> Iter.drop_every(2) == [2, 4]
+      assert 1..4 |> Iter.drop_every(2) == [2, 4]
+    end
+
+    test "pipeline" do
+      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.drop_every(2) == [4, 8]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.drop_every(2) == [4, 8]
+    end
+  end
+
   describe "take_while/2" do
     test "simple call" do
       assert [1, 2, 3, 4, 0] |> Iter.take_while(&(&1 < 3)) == [1, 2]

@@ -227,6 +227,32 @@ defmodule Iter do
   def_iter slice(enumerable, start_index, amount)
 
   @doc """
+  Returns a list of every `nth` element in the `enumerable`, starting
+  with the first element.
+  Equivalent to `Enum.take_every/2`.
+
+  ## Examples
+
+      iex> Iter.take_every(1..10, 3)
+      [1, 4, 7, 10]
+
+  """
+  def_iter take_every(enumerable, nth)
+
+  @doc """
+  Returns a list of every `nth` element in the `enumerable` dropped,
+  starting with the first element.
+  Equivalent to `Enum.drop_every/2`.
+
+  ## Examples
+
+      iex> Iter.drop_every(1..10, 3)
+      [2, 3, 5, 6, 8, 9]
+
+  """
+  def_iter drop_every(enumerable, nth)
+
+  @doc """
   Takes the elements from the beginning of the `enumerable`, while `fun` returns
   a truthy value. Equivalent to `Enum.take_while/2`.
 

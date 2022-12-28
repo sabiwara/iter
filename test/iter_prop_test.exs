@@ -82,6 +82,8 @@ defmodule Iter.PropTest do
       {:take, integer(0..100)},
       {:take_random, integer(0..100)},
       {:drop, integer(0..10)},
+      {:take_every, integer(0..10)},
+      {:drop_every, integer(0..10)},
       {:take_while, filter()},
       {:drop_while, filter()},
       {:slice_2, integer(0..100), integer(0..100), integer(1..10)},
@@ -191,7 +193,17 @@ defmodule Iter.PropTest do
     end
 
     defp do_build_pipeline(ast, {fun, raw_arg}, module)
-         when (fun in [:take, :drop, :take_random, :concat, :join, :zip, :intersperse] and
+         when (fun in [
+                 :take,
+                 :drop,
+                 :take_every,
+                 :drop_every,
+                 :take_random,
+                 :concat,
+                 :join,
+                 :zip,
+                 :intersperse
+               ] and
                  is_number(raw_arg)) or
                 is_list(raw_arg) or is_binary(raw_arg) do
       quote do
