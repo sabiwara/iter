@@ -126,6 +126,35 @@ defmodule Iter.MacroHelpers do
     end
   end
 
+  @spec set_location(Macro.t(), Macro.metadata()) :: Macro.t()
+  def set_location(ast, meta) do
+    if line = meta[:line] do
+      do_set_location(ast, line)
+    else
+      ast
+    end
+  end
+
+  defp do_set_location({call, meta, args} = ast, line) do
+    if Keyword.has_key?(meta, :line) do
+      ast
+    else
+      call = do_set_location(call, line)
+      meta = Keyword.put(meta, :line, line)
+
+      args =
+        case args do
+          list when is_list(list) -> Enum.map(list, &do_set_location(&1, line))
+          atom when is_atom(atom) -> atom
+        end
+
+      {call, meta, args}
+    end
+  end
+
+  defp do_set_location(other, _line), do: other
+
+  @spec inspect_ast(Macro.t()) :: Macro.t()
   def inspect_ast(ast) do
     ast |> Macro.to_string() |> IO.puts()
     ast

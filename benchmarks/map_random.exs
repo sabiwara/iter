@@ -1,4 +1,4 @@
-list = Enum.to_list(1..100) |> Enum.shuffle()
+list = Enum.shuffle(1..100)
 
 defmodule Bench do
   require Iter

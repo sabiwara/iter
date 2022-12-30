@@ -1,7 +1,7 @@
 defmodule Iter.Step do
   @moduledoc false
 
-  import Iter.MacroHelpers, only: [to_exprs: 1]
+  import Iter.MacroHelpers, only: [to_exprs: 1, apply_fun: 2]
 
   alias Iter.Runtime
   alias Iter.MacroHelpers
@@ -34,7 +34,7 @@ defmodule Iter.Step do
       %{initial_acc: fun} -> fun.()
       %{} -> []
     end
-    |> set_location(step)
+    |> MacroHelpers.set_location(step.meta)
   end
 
   @spec init(t) :: ast | nil
@@ -43,7 +43,7 @@ defmodule Iter.Step do
       %{init: fun} -> fun.()
       %{} -> nil
     end
-    |> set_location(step)
+    |> MacroHelpers.set_location(step.meta)
   end
 
   @spec next_acc(t, vars, ast) :: ast
@@ -52,7 +52,7 @@ defmodule Iter.Step do
       %{next_acc: fun} -> fun.(vars, continue)
       %{} -> continue
     end
-    |> set_location(step)
+    |> MacroHelpers.set_location(step.meta)
   end
 
   @spec return_acc(t, vars) :: ast
@@ -61,7 +61,7 @@ defmodule Iter.Step do
       %{return_acc: fun} -> fun.(vars)
       %{} -> quote do: [unquote(vars.elem) | unquote(vars.acc)]
     end
-    |> set_location(step)
+    |> MacroHelpers.set_location(step.meta)
   end
 
   @spec wrap_reduce(t, vars, ast) :: ast
@@ -73,7 +73,7 @@ defmodule Iter.Step do
       end
 
     case step do
-      %{wrap_reduce: fun} -> fun.(ast) |> set_location(step)
+      %{wrap_reduce: fun} -> fun.(ast) |> MacroHelpers.set_location(step.meta)
       %{} -> ast
     end
   end
@@ -84,42 +84,15 @@ defmodule Iter.Step do
       %{wrap_acc: fun} -> fun.(ast)
       %{} -> quote do: :lists.reverse(unquote(ast))
     end
-    |> set_location(step)
+    |> MacroHelpers.set_location(step.meta)
   end
-
-  defp set_location(ast, step) do
-    if line = step.meta[:line] do
-      do_set_location(ast, line)
-    else
-      ast
-    end
-  end
-
-  defp do_set_location({call, meta, args} = ast, line) do
-    if Keyword.has_key?(meta, :line) do
-      ast
-    else
-      call = do_set_location(call, line)
-      meta = Keyword.put(meta, :line, line)
-
-      args =
-        case args do
-          list when is_list(list) -> Enum.map(list, &do_set_location(&1, line))
-          atom when is_atom(atom) -> atom
-        end
-
-      {call, meta, args}
-    end
-  end
-
-  defp do_set_location(other, _line), do: other
 
   @spec map(ast) :: t
   def map(fun) do
     %{
       next_acc: fn vars, continue ->
         quote do
-          unquote(vars.elem) = unquote(MacroHelpers.apply_fun(fun, vars.elem))
+          unquote(vars.elem) = unquote(apply_fun(fun, vars.elem))
           unquote_splicing(to_exprs(continue))
         end
       end
@@ -182,7 +155,7 @@ defmodule Iter.Step do
     %{
       next_acc: fn vars, continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             (unquote_splicing(to_exprs(continue)))
           else
             unquote(vars.composite_acc)
@@ -197,7 +170,7 @@ defmodule Iter.Step do
     %{
       next_acc: fn vars, continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.composite_acc)
           else
             (unquote_splicing(to_exprs(continue)))
@@ -217,7 +190,7 @@ defmodule Iter.Step do
       init: fn -> quote do: unquote(rejected) = [] end,
       next_acc: fn vars, continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             (unquote_splicing(to_exprs(continue)))
           else
             unquote(rejected) = [unquote(vars.elem) | unquote(rejected)]
@@ -458,7 +431,7 @@ defmodule Iter.Step do
       halt: true,
       next_acc: fn vars, continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             (unquote_splicing(to_exprs(continue)))
           else
             {:__ITER_HALT__, unquote(vars.composite_acc)}
@@ -481,7 +454,7 @@ defmodule Iter.Step do
       end,
       next_acc: fn vars, continue ->
         quote do
-          if unquote(switch) or !unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(switch) or !unquote(apply_fun(fun, vars.elem)) do
             unquote(switch) = true
             (unquote_splicing(to_exprs(continue)))
           else
@@ -506,7 +479,7 @@ defmodule Iter.Step do
       end,
       next_acc: fn vars, continue ->
         quote do
-          if unquote(dropped) == [] && unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(dropped) == [] && unquote(apply_fun(fun, vars.elem)) do
             (unquote_splicing(to_exprs(continue)))
           else
             unquote(dropped) = [unquote(vars.elem) | unquote(dropped)]
@@ -531,7 +504,7 @@ defmodule Iter.Step do
       end,
       next_acc: fn vars, continue ->
         quote do
-          key = unquote(MacroHelpers.apply_fun(fun, vars.elem))
+          key = unquote(apply_fun(fun, vars.elem))
 
           case unquote(set) do
             %{^key => _} ->
@@ -557,7 +530,7 @@ defmodule Iter.Step do
       end,
       next_acc: fn vars, continue ->
         quote do
-          case unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          case unquote(apply_fun(fun, vars.elem)) do
             ^unquote(previous) ->
               unquote(vars.composite_acc)
 
@@ -687,7 +660,7 @@ defmodule Iter.Step do
           initial_acc: fn -> quote do: unquote(collectable) end,
           return_acc: fn vars ->
             quote do
-              {key, value} = unquote(MacroHelpers.apply_fun(fun, vars.elem))
+              {key, value} = unquote(apply_fun(fun, vars.elem))
               Map.put(unquote(vars.acc), key, value)
             end
           end,
@@ -728,7 +701,7 @@ defmodule Iter.Step do
       initial_acc: fn -> :ok end,
       next_acc: fn vars, continue ->
         quote do
-          unquote(MacroHelpers.apply_fun(fun, vars.elem))
+          unquote(apply_fun(fun, vars.elem))
           unquote_splicing(to_exprs(continue))
         end
       end,
@@ -756,7 +729,7 @@ defmodule Iter.Step do
       initial_acc: fn -> 0 end,
       return_acc: fn vars ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.acc) + 1
           else
             unquote(vars.acc)
@@ -876,7 +849,7 @@ defmodule Iter.Step do
       initial_acc: fn -> quote do: %{} end,
       return_acc: fn vars ->
         quote do
-          unquote(vars.elem) = unquote(MacroHelpers.apply_fun(fun, vars.elem))
+          unquote(vars.elem) = unquote(apply_fun(fun, vars.elem))
 
           case unquote(vars.acc) do
             acc = %{^unquote(vars.elem) => count} -> %{acc | unquote(vars.elem) => count + 1}
@@ -898,10 +871,10 @@ defmodule Iter.Step do
         quote do
           :lists.foldl(
             fn unquote(elem), acc ->
-              key = unquote(MacroHelpers.apply_fun(key_fun, elem))
+              key = unquote(apply_fun(key_fun, elem))
 
               values = [
-                unquote(MacroHelpers.apply_fun(value_fun, elem)) | Map.get(acc, key, [])
+                unquote(apply_fun(value_fun, elem)) | Map.get(acc, key, [])
               ]
 
               Map.put(acc, key, values)
@@ -921,7 +894,7 @@ defmodule Iter.Step do
       return_acc: fn vars ->
         quote do
           string =
-            case unquote(MacroHelpers.apply_fun(mapper, vars.elem)) do
+            case unquote(apply_fun(mapper, vars.elem)) do
               binary when is_binary(binary) -> binary
               other -> String.Chars.to_string(other)
             end
@@ -946,7 +919,7 @@ defmodule Iter.Step do
       return_acc: fn vars ->
         quote do
           string =
-            case unquote(MacroHelpers.apply_fun(mapper, vars.elem)) do
+            case unquote(apply_fun(mapper, vars.elem)) do
               binary when is_binary(binary) -> binary
               other -> String.Chars.to_string(other)
             end
@@ -1000,7 +973,7 @@ defmodule Iter.Step do
       initial_acc: fn -> false end,
       next_acc: fn vars, _continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.acc) = true
             {:__ITER_HALT__, unquote(vars.composite_acc)}
           else
@@ -1020,7 +993,7 @@ defmodule Iter.Step do
       initial_acc: fn -> true end,
       next_acc: fn vars, _continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.composite_acc)
           else
             unquote(vars.acc) = false
@@ -1068,7 +1041,7 @@ defmodule Iter.Step do
       initial_acc: fn -> :__ITER_RESERVED__ end,
       next_acc: fn vars, _continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.acc) = unquote(vars.elem)
             {:__ITER_HALT__, unquote(vars.composite_acc)}
           else
@@ -1095,7 +1068,7 @@ defmodule Iter.Step do
       initial_acc: fn -> :__ITER_RESERVED__ end,
       next_acc: fn vars, _continue ->
         quote do
-          if value = unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if value = unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.acc) = value
             {:__ITER_HALT__, unquote(vars.composite_acc)}
           else
@@ -1122,7 +1095,7 @@ defmodule Iter.Step do
       initial_acc: fn -> 0 end,
       next_acc: fn vars, _continue ->
         quote do
-          if unquote(MacroHelpers.apply_fun(fun, vars.elem)) do
+          if unquote(apply_fun(fun, vars.elem)) do
             unquote(vars.acc) = {:ok, unquote(vars.acc)}
             {:__ITER_HALT__, unquote(vars.composite_acc)}
           else
@@ -1404,7 +1377,7 @@ defmodule Iter.Step do
     %{
       next_acc: fn vars, continue ->
         quote do
-          unquote(vars.elem) = unquote(MacroHelpers.apply_fun(fun, vars.elem))
+          unquote(vars.elem) = unquote(apply_fun(fun, vars.elem))
 
           unquote(vars.reduce_module).unquote(vars.reduce_fun)(
             unquote(vars.elem),
