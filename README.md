@@ -102,7 +102,7 @@ indexes cannot be replaced in cases needing it. The reason is simple: working
 with negative indexes implies to materialize the whole list once. If you need
 it, you should replace the relevant step to use `Enum`, or maybe call
 `Iter.reverse/1` before accessing it (see
-[_Collecting the pipeline_](#module-collecting-the-pipeline) section).
+[_Collecting the pipeline_](#collecting-the-pipeline) section).
 
 ### API differences
 
