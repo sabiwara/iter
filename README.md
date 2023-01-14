@@ -54,18 +54,30 @@ When there is no possibility of merging steps, `Iter` is simply delegating to
 
 ## Performance
 
+To quote Jose Valim talking
+[about comprehensions](https://elixirforum.com/t/enum-fusion/36193/30):
+
+> "as soon as you start piping into multiple `Enum` and `Stream`, `for` should
+> win by **considerable margins**."
+
+`Iter` delivers the same kind of performance as comprehensions and the exact
+same thing can be said.
+
 The `benchmarks` folder illustrates how `Iter` compares to `Enum` or `Stream`
 through some examples. Results might of course vary greatly depending on the
 input (size, type) and the nature of the operations. Here is a brief summary
-just to illustrate the kind of multipliers that could be expected:
+just to illustrate the kind of multipliers that could be expected (input: list
+of length 100):
 
-|                   | `map \|> filter`            | `map \|> reverse`           | `map \|> find`               | `map \|> sum`                 |
-| ----------------- | --------------------------- | --------------------------- | ---------------------------- | ----------------------------- |
-| `Enum` / `Iter`   | 2.85x slower / 2.08x memory | 2.35x slower / 1.74x memory | 3.70x slower / 59.63x memory | 2.96x slower / 41.00x memory  |
-| `Stream` / `Iter` | 2.92x slower / 7.25x memory | 2.89x slower / 5.24x memory | 4.99x slower / 26.25x memory | 3.09x slower / 173.60x memory |
+|                   | `map \|> filter` | `map \|> reverse` | `map \|> find` | `map \|> sum`  |
+| ----------------- | ---------------- | ----------------- | -------------- | -------------- |
+| `Enum` / `Iter`   | 2.85x slower     | 2.35x slower      | 3.70x slower   | 2.96x slower   |
+|                   | 2.08x memory     | 1.74x memory      | 59.63x memory  | 41.00x memory  |
+| `Stream` / `Iter` | 2.92x slower     | 2.89x slower      | 4.99x slower   | 3.09x slower   |
+|                   | 7.25x memory     | 5.24x memory      | 26.25x memory  | 173.60x memory |
 
 For operations like `sum/1` or `find/2`, the memory complexity is even changed
-from linear to constant.
+from linear to constant, yielding vast improvements for large inputs.
 
 ## Installation
 
