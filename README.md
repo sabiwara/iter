@@ -60,8 +60,8 @@ To quote Jose Valim talking
 > "as soon as you start piping into multiple `Enum` and `Stream`, `for` should
 > win by **considerable margins**."
 
-`Iter` delivers the same kind of performance as comprehensions and the exact
-same thing can be said.
+The exact same thing can be said about `Iter`, which delivers the same
+performance as comprehensions.
 
 The `benchmarks` folder illustrates how `Iter` compares to `Enum` or `Stream`
 through some examples. Results might of course vary greatly depending on the
