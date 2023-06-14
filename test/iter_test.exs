@@ -3,6 +3,16 @@ defmodule IterTest do
   require Iter
   doctest Iter
 
+  defmodule StacktraceCheck do
+    # Note: might need to change the line number below if change the position of this
+    def sum_squares(enumerable, n) do
+      enumerable
+      |> Iter.map(&(&1 ** 2))
+      |> Iter.take(n)
+      |> Iter.sum()
+    end
+  end
+
   defmacrop to_ast(ast) do
     ast |> Macro.expand(__CALLER__) |> Macro.to_string() |> then(&(&1 <> "\n"))
   end
@@ -189,18 +199,13 @@ defmodule IterTest do
     test "stacktrace line" do
       stacktrace =
         try do
-          Code.eval_file("test/fixtures/take_error.exs")
+          StacktraceCheck.sum_squares(1..10, -2)
         rescue
           FunctionClauseError -> __STACKTRACE__
         end
 
-      assert [
-               {Iter.Runtime, :validate_positive_integer, [-1], _},
-               {:elixir_eval, :__FILE__, 1, [file: file, line: 4]}
-               | _
-             ] = stacktrace
-
-      assert to_string(file) |> String.ends_with?("fixtures/take_error.exs")
+      formatted = Exception.format_stacktrace(stacktrace)
+      assert formatted =~ "test/iter_test.exs:11: IterTest.StacktraceCheck.sum_squares/2"
     end
   end
 
