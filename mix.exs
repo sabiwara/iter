@@ -56,6 +56,7 @@ defmodule Iter.MixProject do
 
   defp aliases do
     [
+      docs: ["compile --force", "docs"],
       "test.unit": ["test --exclude property:true"],
       "test.prop": ["test --only property:true"]
     ]
