@@ -135,12 +135,23 @@ iex> Enum.split_with(["ant", "bat", "cat"], & &1 =~ "at")
 {["bat", "cat"], ["ant"]}
 ```
 
-#### Filtering + transforming in one pass: `for/1` comprehension
+#### Filtering + transforming in one pass:
+
+Using a `for/1` comprehension:
 
 ```elixir
 iex> for s <- ["ant", "bat", "cat"], s =~ "at" do
 ...>   String.capitalize(s)
 ...> end
+["Bat", "Cat"]
+```
+
+Using `Enum.flat_map/2`:
+
+```elixir
+iex> Enum.flat_map(["ant", "bat", "cat"], fn s ->
+...>   if s =~ "at", do: [String.capitalize(s)], else: []
+...> end)
 ["Bat", "Cat"]
 ```
 
