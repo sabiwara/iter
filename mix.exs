@@ -11,13 +11,6 @@ defmodule Iter.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      preferred_cli_env: [
-        docs: :docs,
-        "hex.publish": :docs,
-        dialyzer: :test,
-        "test.unit": :test,
-        "test.prop": :test
-      ],
       dialyzer: [flags: [:missing_return, :extra_return]],
       aliases: aliases(),
 
@@ -59,6 +52,18 @@ defmodule Iter.MixProject do
       docs: ["compile --force", "docs"],
       "test.unit": ["test --exclude property:true"],
       "test.prop": ["test --only property:true"]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
+        docs: :docs,
+        "hex.publish": :docs,
+        dialyzer: :test,
+        "test.unit": :test,
+        "test.prop": :test
+      ]
     ]
   end
 
