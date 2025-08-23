@@ -87,7 +87,7 @@ linear to constant, yielding vast improvements for large inputs.
 ```elixir
 def deps do
   [
-    {:iter, "~> 0.1.2"}
+    {:iter, "~> 0.1.3"}
   ]
 end
 ```

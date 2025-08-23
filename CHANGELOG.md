@@ -2,6 +2,8 @@
 
 ## Dev
 
+## v0.1.3 (2025-08-23)
+
 ### Enhancements
 
 - Use same reservoir-sampling L-algorithm as [Elixir 1.17](https://github.com/elixir-lang/elixir/commit/8e9cbfcd8c219f9d3558158f1ebee5ec4fadd762) for `Iter.take_random/2`
