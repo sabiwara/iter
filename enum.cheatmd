@@ -360,7 +360,7 @@ iex> Enum.fetch!(["ant", "bat", "cat"], 0)
 iex> Enum.fetch!(["ant", "bat", "cat"], -1)
 "cat"
 iex> Enum.fetch!(["ant", "bat", "cat"], 3)
-** (Enum.OutOfBoundsError) out of bounds error
+** (Enum.OutOfBoundsError) out of bounds error...
 ```
 
 #### `:ok`/`:error` result: `Enum.fetch/2`
