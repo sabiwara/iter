@@ -2,6 +2,12 @@
 
 ## Dev
 
+### Enhancements
+
+- Use same reservoir-sampling L-algorithm as [Elixir 1.17](https://github.com/elixir-lang/elixir/commit/8e9cbfcd8c219f9d3558158f1ebee5ec4fadd762) for `Iter.take_random/2`
+- Make `Iter.shuffle/1` consistent with `Enum` (reversed)
+- Bump `ex_doc`
+
 ## v0.1.2 (2022-12-28)
 
 ### Enhancements
