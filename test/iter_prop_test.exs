@@ -64,11 +64,7 @@ defmodule Iter.PropTest do
       {:split_while, filter()},
       {:frequencies_by, key_mapper()},
       :frequencies,
-
-      # temporarily disable until we re-implemented random with
-      # https://github.com/elixir-lang/elixir/commit/8e9cbfcd8c219f9d3558158f1ebee5ec4fadd762
-      # :random,
-
+      :random,
       {:group_by, key_mapper()},
       {:zip, list_of(integer())},
       {:into, one_of([Map]), key_mapper()},
@@ -84,11 +80,7 @@ defmodule Iter.PropTest do
       {:filter, filter()},
       {:reject, filter()},
       {:take, integer(0..100)},
-
-      # temporarily disable until we re-implemented random with
-      # https://github.com/elixir-lang/elixir/commit/8e9cbfcd8c219f9d3558158f1ebee5ec4fadd762
-      # {:take_random, integer(0..100)},
-
+      {:take_random, integer(0..100)},
       {:drop, integer(0..10)},
       {:take_every, integer(0..10)},
       {:drop_every, integer(0..10)},
@@ -100,11 +92,7 @@ defmodule Iter.PropTest do
       :to_list,
       :reverse,
       :sort,
-
-      # temporarily disable until we re-implemented random with
-      # https://github.com/elixir-lang/elixir/commit/8e9cbfcd8c219f9d3558158f1ebee5ec4fadd762
-      # :shuffle,
-
+      :shuffle,
       :uniq,
       :dedup,
       {:intersperse, number()},

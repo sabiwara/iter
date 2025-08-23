@@ -32,6 +32,9 @@ jobs:
       - name: Unit tests
         run: mix test.unit ${{ matrix.testArgs }}
       - name: Property-based tests
+        # Only on LTS for now since the take_random algorithm changed in 1.17.
+        # TODO unskip this once we only support more recent versions.
+        if: "${{ matrix.testArgs == '' }}"
         run: PROP_TEST_RUNTIME=30000 mix test.prop ${{ matrix.testArgs }}
 
   format:
