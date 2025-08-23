@@ -1077,12 +1077,12 @@ defmodule IterTest do
   describe "sort/1" do
     test "simple call" do
       assert [2, 4, 1, 3] |> Iter.sort() == [1, 2, 3, 4]
-      assert 4..1 |> Iter.sort() == [1, 2, 3, 4]
+      assert 4..1//-1 |> Iter.sort() == [1, 2, 3, 4]
     end
 
     test "pipeline" do
       assert [2, 4, 1, 3] |> Iter.map(&(&1 * 2)) |> Iter.sort() == [2, 4, 6, 8]
-      assert 4..1 |> Iter.map(&(&1 * 2)) |> Iter.sort() == [2, 4, 6, 8]
+      assert 4..1//-1 |> Iter.map(&(&1 * 2)) |> Iter.sort() == [2, 4, 6, 8]
     end
   end
 
