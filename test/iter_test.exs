@@ -1126,7 +1126,14 @@ defmodule IterTest do
 
     test "pipeline" do
       assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.take_random(2) == [6, 2]
-      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.take_random(2) == [4, 8]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.take_random(2) == [4, 2]
+    end
+
+    test "big list - sanity check" do
+      expected = Enum.to_list(1..200)
+
+      assert 1..200 |> Iter.take_random(300) |> Enum.sort() == expected
+      assert 1..200 |> Iter.map(&(&1 * 1)) |> Iter.take_random(300) |> Enum.sort() == expected
     end
   end
 
@@ -1140,8 +1147,15 @@ defmodule IterTest do
     end
 
     test "pipeline" do
-      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.shuffle() == [6, 4, 2, 8]
-      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.shuffle() == [2, 6, 4, 8]
+      assert [1, 2, 3, 4] |> Iter.map(&(&1 * 2)) |> Iter.shuffle() == [8, 2, 4, 6]
+      assert 1..4 |> Iter.map(&(&1 * 2)) |> Iter.shuffle() == [8, 4, 6, 2]
+    end
+
+    test "big list - sanity check" do
+      expected = Enum.to_list(1..200)
+
+      assert 1..200 |> Iter.shuffle() |> Enum.sort() == expected
+      assert 1..200 |> Iter.map(&(&1 * 1)) |> Iter.shuffle() |> Enum.sort() == expected
     end
   end
 

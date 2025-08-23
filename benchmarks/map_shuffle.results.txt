@@ -26,46 +26,46 @@ Formatting results...
 
 ##### With input 100 #####
 Name             ips        average  deviation         median         99th %
-Iter        136.98 K        7.30 μs    ±45.36%           7 μs       10.58 μs
-Stream      115.41 K        8.66 μs    ±30.49%        8.38 μs       11.17 μs
-Enum        115.00 K        8.70 μs    ±74.77%        8.38 μs       11.33 μs
+Iter        130.53 K        7.66 μs    ±19.54%        7.42 μs       10.25 μs
+Enum        115.76 K        8.64 μs    ±27.54%        8.33 μs       11.71 μs
+Stream      115.66 K        8.65 μs    ±45.25%        8.29 μs       11.71 μs
 
 Comparison: 
-Iter        136.98 K
-Stream      115.41 K - 1.19x slower +1.36 μs
-Enum        115.00 K - 1.19x slower +1.40 μs
+Iter        130.53 K
+Enum        115.76 K - 1.13x slower +0.98 μs
+Stream      115.66 K - 1.13x slower +0.99 μs
 
 Memory usage statistics:
 
 Name           average  deviation         median         99th %
-Iter          23.37 KB     ±3.42%       23.94 KB       24.27 KB
-Stream        30.06 KB     ±2.62%       29.35 KB       30.90 KB
-Enum          24.96 KB     ±3.17%       24.25 KB       25.83 KB
+Iter          23.38 KB     ±3.41%       23.94 KB       24.27 KB
+Enum          24.96 KB     ±3.16%       24.25 KB       25.83 KB
+Stream        30.07 KB     ±2.63%       30.80 KB       30.90 KB
 
 Comparison: 
 Iter          23.94 KB
-Stream        30.06 KB - 1.29x memory usage +6.69 KB
-Enum          24.96 KB - 1.07x memory usage +1.59 KB
+Enum          24.96 KB - 1.07x memory usage +1.58 KB
+Stream        30.07 KB - 1.29x memory usage +6.69 KB
 
 ##### With input 10000 #####
 Name             ips        average  deviation         median         99th %
-Iter          547.31        1.83 ms    ±14.06%        1.76 ms        2.34 ms
-Stream        489.35        2.04 ms    ±18.55%        1.93 ms        3.83 ms
-Enum          484.80        2.06 ms    ±13.94%        1.98 ms        2.69 ms
+Iter          533.49        1.87 ms    ±12.02%        1.83 ms        2.38 ms
+Stream        490.51        2.04 ms    ±13.31%        1.94 ms        2.61 ms
+Enum          487.78        2.05 ms    ±14.81%        1.97 ms        2.74 ms
 
 Comparison: 
-Iter          547.31
-Stream        489.35 - 1.12x slower +0.22 ms
-Enum          484.80 - 1.13x slower +0.24 ms
+Iter          533.49
+Stream        490.51 - 1.09x slower +0.164 ms
+Enum          487.78 - 1.09x slower +0.176 ms
 
 Memory usage statistics:
 
 Name           average  deviation         median         99th %
-Iter           2.88 MB     ±2.65%        2.95 MB        2.95 MB
-Stream         3.48 MB     ±2.20%        3.41 MB        3.56 MB
-Enum           3.03 MB     ±2.52%        3.10 MB        3.10 MB
+Iter           2.87 MB     ±2.67%        2.79 MB        2.95 MB
+Stream         3.48 MB     ±2.20%        3.48 MB        3.56 MB
+Enum           3.01 MB     ±2.51%        2.95 MB        3.10 MB
 
 Comparison: 
-Iter           2.95 MB
-Stream         3.48 MB - 1.21x memory usage +0.60 MB
-Enum           3.03 MB - 1.05x memory usage +0.153 MB
+Iter           2.79 MB
+Stream         3.48 MB - 1.21x memory usage +0.61 MB
+Enum           3.01 MB - 1.05x memory usage +0.142 MB

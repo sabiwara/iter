@@ -1281,44 +1281,35 @@ defmodule Iter.Step do
 
   @spec take_random(ast) :: t
   def take_random(_amount = value) do
-    amount = Macro.unique_var(:amount, __MODULE__)
-    idx = Macro.unique_var(:idx, __MODULE__)
+    count = Macro.unique_var(:count, __MODULE__)
 
     %{
       collect: true,
-      extra_args: [idx],
       init: fn ->
         quote do
-          unquote(amount) = Runtime.validate_positive_integer(unquote(value))
-          unquote(idx) = -1
+          unquote(count) = Runtime.validate_positive_integer(unquote(value))
         end
       end,
       initial_acc: fn ->
         quote do
-          if unquote(amount) <= 128 do
-            Tuple.duplicate(nil, unquote(amount))
-          else
-            %{}
-          end
-        end
-      end,
-      next_acc: fn _vars, continue ->
-        quote do
-          unquote(idx) = unquote(idx) + 1
-          unquote_splicing(to_exprs(continue))
+          sample =
+            case unquote(count) do
+              1 -> nil
+              count when count <= 128 -> Tuple.duplicate(nil, count)
+              _ -> %{}
+            end
+
+          {_idx = 0, _jdx = unquote(count) - 1, _w = 1.0, sample}
         end
       end,
       return_acc: fn vars ->
         quote do
-          Runtime.do_take_random(unquote_splicing([vars.acc, idx, amount, vars.elem]))
+          Runtime.do_take_random(unquote_splicing([vars.acc, count, vars.elem]))
         end
       end,
       wrap_acc: fn ast ->
         quote do
-          Runtime.wrap_take_random(
-            unquote(ast),
-            Kernel.min(unquote(amount), unquote(idx) + 1)
-          )
+          Runtime.wrap_take_random(unquote(ast), unquote(count))
         end
       end
     }

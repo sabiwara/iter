@@ -21,71 +21,112 @@ defmodule Iter.Runtime do
   end
 
   def wrap_shuffle(randomized) do
-    :lists.keysort(1, randomized) |> do_wrap_shuffle([])
+    :lists.keysort(1, randomized) |> do_wrap_shuffle()
   end
 
-  defp do_wrap_shuffle([], acc), do: acc
+  defp do_wrap_shuffle([]), do: []
 
-  defp do_wrap_shuffle([{_, value} | tail], acc) do
-    do_wrap_shuffle(tail, [value | acc])
+  defp do_wrap_shuffle([{_, value} | tail]) do
+    [value | do_wrap_shuffle(tail)]
   end
 
-  def do_take_random(sample, _idx, _amount = 0, _elem), do: sample
+  def do_take_random(acc, _count = 0, _elem), do: acc
 
-  def do_take_random(sample, idx, amount, elem) when is_map(sample) do
-    jdx =
-      case idx do
-        0 -> 0
-        _ -> :rand.uniform(idx + 1) - 1
-      end
+  def do_take_random({idx, jdx, w, sample}, _count = 1, elem) do
+    case idx do
+      ^jdx ->
+        {jdx, w} = take_jdx_w(idx, w, 1)
+        {idx + 1, jdx, w, elem}
 
-    cond do
-      idx < amount ->
-        value = Map.get(sample, jdx)
-        Map.put(sample, idx, value) |> Map.put(jdx, elem)
-
-      jdx < amount ->
-        Map.put(sample, jdx, elem)
-
-      true ->
-        sample
+      _ ->
+        {idx + 1, jdx, w, sample}
     end
   end
 
-  def do_take_random(sample, idx, amount, elem) when is_tuple(sample) do
-    jdx =
-      case idx do
-        0 -> 0
-        _ -> :rand.uniform(idx + 1) - 1
-      end
+  def do_take_random({idx, jdx, w, sample}, count, elem) when is_tuple(sample) do
+    case idx do
+      idx when idx < count ->
+        rand = take_index(idx)
+        sample = sample |> put_elem(idx, elem(sample, rand)) |> put_elem(rand, elem)
 
-    cond do
-      idx < amount ->
-        value = elem(sample, jdx)
-        put_elem(sample, idx, value) |> put_elem(jdx, elem)
+        if idx == jdx do
+          {jdx, w} = take_jdx_w(idx, w, count)
+          {idx + 1, jdx, w, sample}
+        else
+          {idx + 1, jdx, w, sample}
+        end
 
-      jdx < amount ->
-        put_elem(sample, jdx, elem)
+      ^jdx ->
+        pos = :rand.uniform(count) - 1
+        {jdx, w} = take_jdx_w(idx, w, count)
+        {idx + 1, jdx, w, put_elem(sample, pos, elem)}
 
-      true ->
-        sample
+      _ ->
+        {idx + 1, jdx, w, sample}
     end
   end
 
-  def wrap_take_random(tuple, amount) when is_tuple(tuple) do
-    Tuple.to_list(tuple) |> Enum.take(amount)
+  def do_take_random({idx, jdx, w, sample}, count, elem) when is_map(sample) do
+    case idx do
+      idx when idx < count ->
+        rand = take_index(idx)
+        sample = sample |> Map.put(idx, Map.get(sample, rand)) |> Map.put(rand, elem)
+
+        if idx == jdx do
+          {jdx, w} = take_jdx_w(idx, w, count)
+          {idx + 1, jdx, w, sample}
+        else
+          {idx + 1, jdx, w, sample}
+        end
+
+      ^jdx ->
+        pos = :rand.uniform(count) - 1
+        {jdx, w} = take_jdx_w(idx, w, count)
+        {idx + 1, jdx, w, Map.put(sample, pos, elem)}
+
+      _ ->
+        {idx + 1, jdx, w, sample}
+    end
   end
 
-  def wrap_take_random(map, amount) when is_map(map) do
-    do_wrap_take_random(map, amount, [])
+  @compile {:inline, take_jdx_w: 3, take_index: 1}
+
+  defp take_jdx_w(idx, w, count) do
+    w = w * :math.exp(:math.log(:rand.uniform()) / count)
+    jdx = idx + floor(:math.log(:rand.uniform()) / :math.log(1 - w)) + 1
+    {jdx, w}
   end
 
-  defp do_wrap_take_random(_sample, 0, acc), do: acc
+  defp take_index(0), do: 0
+  defp take_index(idx), do: :rand.uniform(idx + 1) - 1
 
-  defp do_wrap_take_random(sample, position, acc) do
+  def wrap_take_random({_size = 0, _, _, nil}, _count = 1), do: []
+  def wrap_take_random({size, _, _, sample}, _count = 1) when size > 0, do: [sample]
+
+  def wrap_take_random({size, _, _, sample}, count) when is_tuple(sample) do
+    if count < size do
+      Tuple.to_list(sample)
+    else
+      take_tupled(sample, size, [])
+    end
+  end
+
+  def wrap_take_random({size, _, _, sample}, count) when is_map(sample) do
+    take_mapped(sample, Kernel.min(count, size), [])
+  end
+
+  defp take_tupled(_sample, 0, acc), do: acc
+
+  defp take_tupled(sample, position, acc) do
     position = position - 1
-    %{^position => elem} = sample
-    do_wrap_take_random(sample, position, [elem | acc])
+    take_tupled(sample, position, [elem(sample, position) | acc])
+  end
+
+  defp take_mapped(_sample, 0, acc), do: acc
+
+  defp take_mapped(sample, position, acc) do
+    position = position - 1
+    take_mapped(sample, position, [Map.fetch!(sample, position) | acc])
   end
 
   @compile {:inline, reduce_while_list: 3, reduce_while_range: 5}
