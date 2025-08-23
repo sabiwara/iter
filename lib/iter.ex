@@ -1197,7 +1197,7 @@ defmodule Iter do
       # Although not necessary, let's seed the random algorithm
       iex> :rand.seed(:exsss, {1, 2, 3})
       iex> Iter.take_random(1..100, 3)
-      [74, 28, 55]
+      [92, 45, 9]
 
   """
   def_iter take_random(enumerable, amount)
@@ -1213,7 +1213,7 @@ defmodule Iter do
       # Although not necessary, let's seed the random algorithm
       iex> :rand.seed(:exsss, {1, 2, 3})
       iex> Iter.shuffle(1..6)
-      [3, 2, 5, 1, 4, 6]
+      [6, 4, 1, 5, 2, 3]
 
   """
   def_iter shuffle(enumerable)

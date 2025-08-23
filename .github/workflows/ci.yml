@@ -12,10 +12,13 @@ jobs:
         include:
           - elixir: "1.14.1"
             otp: "25.0"
-          - elixir: "1.15.7"
-            otp: "26.0"
+            testArgs: "--exclude=lts_only"
           - elixir: "1.16.0"
             otp: "26.2"
+            testArgs: "--exclude=lts_only"
+          - elixir: "1.18.4"
+            otp: "27.3"
+            testArgs: ""
     steps:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
@@ -27,9 +30,9 @@ jobs:
       - name: Check compile warnings
         run: mix compile --warnings-as-errors
       - name: Unit tests
-        run: mix test.unit
+        run: mix test.unit ${{ matrix.testArgs }}
       - name: Property-based tests
-        run: PROP_TEST_RUNTIME=30000 mix test.prop
+        run: PROP_TEST_RUNTIME=30000 mix test.prop ${{ matrix.testArgs }}
 
   format:
     runs-on: ubuntu-latest
@@ -37,8 +40,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: "1.16"
-            otp: "26.2"
+          - elixir: "1.18.4"
+            otp: "27.3"
     steps:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1

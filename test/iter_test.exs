@@ -1,7 +1,7 @@
 defmodule IterTest do
   use ExUnit.Case, async: true
   require Iter
-  doctest Iter
+  doctest Iter, tags: [lts_only: true]
 
   defmacrop to_ast(ast) do
     ast |> Macro.expand(__CALLER__) |> Macro.to_string() |> then(&(&1 <> "\n"))
@@ -1101,6 +1101,7 @@ defmodule IterTest do
   end
 
   describe "random/1" do
+    @describetag :lts_only
     setup :seed
 
     test "simple call" do
@@ -1115,11 +1116,12 @@ defmodule IterTest do
   end
 
   describe "take_random/2" do
+    @describetag :lts_only
     setup :seed
 
     test "simple call" do
       assert [1, 2, 3, 4] |> Iter.take_random(2) == [3, 1]
-      assert 1..4 |> Iter.take_random(2) == [2, 4]
+      assert 1..4 |> Iter.take_random(2) == [2, 1]
     end
 
     test "pipeline" do
@@ -1129,11 +1131,12 @@ defmodule IterTest do
   end
 
   describe "shuffle/1" do
+    @describetag :lts_only
     setup :seed
 
     test "simple call" do
-      assert [1, 2, 3, 4] |> Iter.shuffle() == [3, 2, 1, 4]
-      assert 1..4 |> Iter.shuffle() == [1, 3, 2, 4]
+      assert [1, 2, 3, 4] |> Iter.shuffle() == [4, 1, 2, 3]
+      assert 1..4 |> Iter.shuffle() == [4, 2, 3, 1]
     end
 
     test "pipeline" do
