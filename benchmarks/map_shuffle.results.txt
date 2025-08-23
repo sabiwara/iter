@@ -1,0 +1,71 @@
+Operating System: macOS
+CPU Information: Apple M1
+Number of Available Cores: 8
+Available memory: 16 GB
+Elixir 1.18.4
+Erlang 27.3
+JIT enabled: true
+
+Benchmark suite executing with the following configuration:
+warmup: 2 s
+time: 2 s
+memory time: 500 ms
+reduction time: 0 ns
+parallel: 1
+inputs: 100, 10000
+Estimated total run time: 27 s
+
+Benchmarking Enum with input 100 ...
+Benchmarking Enum with input 10000 ...
+Benchmarking Iter with input 100 ...
+Benchmarking Iter with input 10000 ...
+Benchmarking Stream with input 100 ...
+Benchmarking Stream with input 10000 ...
+Calculating statistics...
+Formatting results...
+
+##### With input 100 #####
+Name             ips        average  deviation         median         99th %
+Iter        136.98 K        7.30 μs    ±45.36%           7 μs       10.58 μs
+Stream      115.41 K        8.66 μs    ±30.49%        8.38 μs       11.17 μs
+Enum        115.00 K        8.70 μs    ±74.77%        8.38 μs       11.33 μs
+
+Comparison: 
+Iter        136.98 K
+Stream      115.41 K - 1.19x slower +1.36 μs
+Enum        115.00 K - 1.19x slower +1.40 μs
+
+Memory usage statistics:
+
+Name           average  deviation         median         99th %
+Iter          23.37 KB     ±3.42%       23.94 KB       24.27 KB
+Stream        30.06 KB     ±2.62%       29.35 KB       30.90 KB
+Enum          24.96 KB     ±3.17%       24.25 KB       25.83 KB
+
+Comparison: 
+Iter          23.94 KB
+Stream        30.06 KB - 1.29x memory usage +6.69 KB
+Enum          24.96 KB - 1.07x memory usage +1.59 KB
+
+##### With input 10000 #####
+Name             ips        average  deviation         median         99th %
+Iter          547.31        1.83 ms    ±14.06%        1.76 ms        2.34 ms
+Stream        489.35        2.04 ms    ±18.55%        1.93 ms        3.83 ms
+Enum          484.80        2.06 ms    ±13.94%        1.98 ms        2.69 ms
+
+Comparison: 
+Iter          547.31
+Stream        489.35 - 1.12x slower +0.22 ms
+Enum          484.80 - 1.13x slower +0.24 ms
+
+Memory usage statistics:
+
+Name           average  deviation         median         99th %
+Iter           2.88 MB     ±2.65%        2.95 MB        2.95 MB
+Stream         3.48 MB     ±2.20%        3.41 MB        3.56 MB
+Enum           3.03 MB     ±2.52%        3.10 MB        3.10 MB
+
+Comparison: 
+Iter           2.95 MB
+Stream         3.48 MB - 1.21x memory usage +0.60 MB
+Enum           3.03 MB - 1.05x memory usage +0.153 MB

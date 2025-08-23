@@ -3,9 +3,9 @@ inputs = Enum.map([100, 10_000], &{&1, Enum.shuffle(1..&1)})
 defmodule Bench do
   require Iter
 
-  def enum(list), do: list |> Enum.map(&(&1 + 1)) |> Enum.random()
-  def stream(list), do: list |> Stream.map(&(&1 + 1)) |> Enum.random()
-  def iter(list), do: list |> Iter.map(&(&1 + 1)) |> Iter.random()
+  def enum(list), do: list |> Enum.map(&(&1 + 1)) |> Enum.shuffle()
+  def stream(list), do: list |> Stream.map(&(&1 + 1)) |> Enum.shuffle()
+  def iter(list), do: list |> Iter.map(&(&1 + 1)) |> Iter.shuffle()
 end
 
 Benchee.run(
