@@ -1015,7 +1015,7 @@ defmodule Iter do
       :baz
 
       iex> Iter.fetch!([:foo, :bar, :baz], 3)
-      ** (Enum.OutOfBoundsError) out of bounds error
+      ** (Enum.OutOfBoundsError) out of bounds error...
 
   """
   def_iter fetch!(enumerable, index)

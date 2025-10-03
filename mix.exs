@@ -19,7 +19,8 @@ defmodule Iter.MixProject do
         "A blazing fast compile-time optimized alternative to the `Enum` and `Stream` modules",
       package: package(),
       name: "Iter",
-      docs: docs()
+      docs: docs(),
+      test_ignore_filters: [~r|^test\/fixtures\/|]
     ]
   end
 

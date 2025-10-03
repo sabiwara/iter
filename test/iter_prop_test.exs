@@ -2,7 +2,7 @@ defmodule Iter.PropTest do
   use ExUnit.Case, async: true
   use ExUnitProperties
 
-  require Iter
+  require Iter, warn: false
 
   @moduletag timeout: :infinity
   @moduletag :property
