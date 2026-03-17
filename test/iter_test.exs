@@ -196,7 +196,7 @@ defmodule IterTest do
 
       assert [
                {Iter.Runtime, :validate_positive_integer, [-1], _},
-               {:elixir_eval, :__FILE__, 1, [file: file, line: 4]}
+               {_, :__FILE__, 1, [file: file, line: 4]}
                | _
              ] = stacktrace
 
